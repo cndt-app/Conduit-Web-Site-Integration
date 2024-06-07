@@ -317,5 +317,4 @@ chrome.runtime.onStartup.addListener(keepAlive);
 keepAlive();
 setTimeout(cron, 5000);
 
-//todo sometimes first connection in schedule dosn't have a spinner
 //todo after reload of app can circle previous spinner

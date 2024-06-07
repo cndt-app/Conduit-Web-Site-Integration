@@ -69,12 +69,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
     fill_connection_list();
-    chrome.storage.local.get("retrieving_page_index", function (data) {
-        if (data.retrieving_page_index) {
-            indicate_retrieving(data.retrieving_page_index)
-
-        }
-    })
 });
 
 function exportToCsv(filename, rows) {
@@ -446,7 +440,7 @@ function fill_connection_list() {
 
         })
         chrome.storage.local.get("retrieving_page_index", function (data) {
-            if (data.retrieving_page_index) {
+            if (data.retrieving_page_index !== undefined) {
                 indicate_retrieving(data.retrieving_page_index)
 
             }
