@@ -127,6 +127,8 @@ async function open_url(tab_id, url, table_id, name = 'table', scroll_attempts =
                                 reject({error_type: 'Options error', message: "Url is not configured"})
                             }
 
+                        }).catch(function (err) {
+                            reject({message: JSON.stringify(err)})
                         });
 
                         chrome.webNavigation.onCompleted.removeListener(onCompletted);
