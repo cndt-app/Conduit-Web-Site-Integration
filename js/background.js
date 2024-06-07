@@ -112,7 +112,7 @@ async function open_url(tab_id, url, table_id, name = 'table', scroll_attempts =
                                         }
                                     ).then(async function (response) {
                                         if (response.ok) {
-                                            response.message = `${name}: ${responseCT.rows.length} rows`
+                                            response.message = `${responseCT.rows.length} rows`
                                             resolve(response);
                                         } else {
                                             response.error_type = "Http status"
@@ -165,7 +165,7 @@ async function open_page_object(pages, index, tabId, auto_interval = false) {
             page['last_request']['result'] = "OK";
             page['last_request']['message'] = response.message
             message['log'] = {}
-            message['log']['message'] = response.message
+            message['log']['message'] = `${page.name}: ${response.message}`
             message['log']['type'] = 'success'
         })
         .catch((error) => {
