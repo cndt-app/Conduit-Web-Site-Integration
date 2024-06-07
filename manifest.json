@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "Conduit. Web Site Integration",
+  "description": "Conduit. Web Site Integration",
+  "version": "1.0",
+  "background": {
+    "service_worker": "js/background.js"
+  },
+  "action": {
+    "default_icon": {
+      "16": "staff/conduit-16.png",
+      "24": "staff/conduit-24.png",
+      "128": "staff/conduit-128.png"
+    },
+    "default_popup": "html/popup.html",
+    "default_title": "Conduit. Web Site Integration"
+  },
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "declarativeContent",
+    "webRequest",
+    "storage",
+    "scripting",
+    "webNavigation",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "*://*/*",
+    "https://api.getconduit.app/*"
+  ],
+  "icons": {
+    "16": "staff/conduit-16.png",
+    "24": "staff/conduit-24.png",
+    "128": "staff/conduit-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*/*"
+      ],
+      "js": [
+        "staff/jquery.min.js",
+        "js/content_script.js"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Conduit. Web Site Integration</title>
+
+    <link rel="stylesheet" href="../css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../css/plugin.css"/>
+</head>
+<body>
+<header>
+    <span><span><strong>conduit.</strong> Web Site Integration</span></span>
+    <a href="../html/options.html" target="settings" class="align-content-center">
+        <div id="options" data-i18n="options_short" aria-label="Options"></div>
+    </a>
+    <a href="https://app.getconduit.app/discover/integrate-your-web-page-or-app/" target="_blank"
+       class="align-content-center"
+       style="margin-left:5px;">
+        <div id="conduit-help"></div>
+    </a>
+    <a href="https://app.getconduit.app/r/copilot/" target="_blank" class="align-content-center"
+       style="margin-left:5px;">
+        <div id="conduit-link"></div>
+    </a>
+    <div id="error_banner"></div>
+</header>
+<main style="position: relative;">
+    <div id="console-block">
+        <div id="console-close">x</div>
+        <span id="console-log">
+        </span>
+    </div>
+    <screen id="main">
+        <div class="page-card">
+            <h2>Create new data connection from this website</h2>
+            <div class="card">
+                <center>
+                    <strong class="table_amount" class="amount">No</strong> <span>tables are found on this page</span>
+                    <button class="btn btn-primary" id='create-new-button'>Connect Table</button>
+                </center>
+            </div>
+        </div>
+        <div class="page-card" id="existing-data-connections-container" style="display: none;">
+            <h2>Existing data connections:</h2>
+            <div class="card" class="existing-connections-card">
+                <table id="existing-data-connections"></table>
+            </div>
+        </div>
+        <div id="retrieve-all-card" class="page-card" style="display: none;">
+            <h2>Control panel</h2>
+            <div class="card">
+                <center>
+                    <button class="btn btn-light btn-outline-dark" id="retrieve-all-button">Sync all now</button>
+                    <button class="btn btn-light btn-outline-dark" id="sync-schedule-button">Sync schedule</button>
+                </center>
+            </div>
+        </div>
+    </screen>
+    <screen id="create-new" class="visually-hidden">
+        <form id="create-new-form">
+            <div class="page-card">
+                <h2>Create new Integration</h2>
+                <div class="card">
+                    <p>
+                        Step 1: <strong>Open the webpage</strong> where the table is located, then open this dialog. If
+                        you're already there, proceed to step 2
+                    </p>
+                    <p>Step 2: <strong>Choose Table</strong> from the list below:</p>
+                    <div class="card">
+                        <div class="stats" style="position:relative;">
+                            <strong class="table_amount" class="amount">No</strong> <span>tables on this page</span>
+                            <div class="tables" data-action="select"></div>
+                            <input type="text" name="table_id" id="table_id" required
+                                   style="width:0px;height: 0px;border: none;position: absolute;"/>
+                            <div id="to-csv-link-container"></div>
+                        </div>
+                    </div>
+                    <table cellpadding="5">
+                        <tr>
+                            <td><input type="checkbox" checked id="auto_scroll" name="auto_scroll"></td>
+                            <td>
+                                <label for="auto_scroll">Automatically
+                                    scroll the page when pulling table rows.</label>
+                            </td>
+                        </tr>
+                    </table>
+                    <p>Step 3: <strong>Name</strong> the table
+                        <input type="text" name="name" id="retrieve_name" style="width: 100%;" required>
+                    </p>
+                    <span>Step 4: <strong>Destination</strong> for the table</span>
+                    <table>
+                        <tr>
+                            <td>URL</td>
+                            <td>
+                                <input type="url" id="send_to_url" style="width: 100%">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="m-3">
+                <span class="btn btn-danger" id="delete-retrieving-button">Delete</span> &nbsp;
+                <button class="btn btn-primary" id="save-retrieving-button" type="submit">Save</button>
+                <span class="btn btn-secondary" id="cancel-manage-button">Cancel</span>
+            </div>
+        </form>
+    </screen>
+    <screen id="scheduler-edit" class="visually-hidden">
+
+        <form id="scheduler-settings">
+            <div class="page-card">
+                <h2>Sync Schedule</h2>
+                <div class="card">
+                    <div class="form-check">
+                        <input type="checkbox" name="schedule_enable" id="schedule_enable" class="form-check-input">
+                        <label for="schedule_enable" class="form-check-label">Enable the Schedule</label>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="schedule_interval" id="schedule_interval_1m"
+                               value="1m" required>
+                        <label class="form-check-label" for="schedule_interval_1m">
+                            Every 1 minute
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="schedule_interval" id="schedule_interval_15m"
+                               value="15m" required>
+                        <label class="form-check-label" for="schedule_interval_15m">
+                            Every 15 minutes
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="schedule_interval" id="schedule_interval_30m"
+                               value="30m" required>
+                        <label class="form-check-label" for="schedule_interval_30m">
+                            Every 30 minutes
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="schedule_interval" id="schedule_interval_1h"
+                               value="1h" required>
+                        <label class="form-check-label" for="schedule_interval_1h">
+                            Every 1 hour
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="schedule_interval" id="schedule_interval_6h"
+                               value="6h" required>
+                        <label class="form-check-label" for="schedule_interval_6h">
+                            Every 6 hours
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="schedule_interval" id="schedule_interval_12h"
+                               value="12h" required>
+                        <label class="form-check-label" for="schedule_interval_12h">
+                            Every 12 hours
+                        </label>
+                    </div>
+
+                    <div class="m-3">
+                        <button class="btn btn-primary" id="save-schedule-button" type="submit">Save</button>
+                        <span class="btn btn-secondary" id="cancel-schedule-button">Cancel</span>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </screen>
+
+</main>
+<footer>
+
+</footer>
+<template id="spinner-template">
+    <div class="spinner-border text-primary" role="status" style="width: 1rem;height: 1rem;opacity: 0.5">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</template>
+<script src="../js/popup.js"></script>
+</body>
+</html>
