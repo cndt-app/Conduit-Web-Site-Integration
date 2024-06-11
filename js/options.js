@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         form_settings.innerHTML = JSON.stringify(data.plugin_json_settings, undefined, 4)
     });
+    request_state();
 });
 form_settings.addEventListener('keyup', function (ev) {
     ev.preventDefault();
@@ -65,3 +66,23 @@ load_defaults.addEventListener('click', function () {
 
     }
 })
+
+function request_state() {
+    chrome.runtime.sendMessage({action: "request_state"}, function (response) {
+        document.getElementById("settings-console").innerText = `job_runing=${response.job_running}, canceled=${response.canceled}`
+    })
+}
+
+function reset_state() {
+    chrome.runtime.sendMessage({action: "reset_state"}, function (response) {
+        document.getElementById("settings-console").innerText = `job_runing=${response.job_running}, canceled=${response.canceled}`
+    })
+}
+
+document.getElementById("reset_state").addEventListener('click', function () {
+    if (confirm('Are you sure want reset running job state?')) {
+        reset_state();
+    }
+})
+
+setInterval(request_state, 2000)

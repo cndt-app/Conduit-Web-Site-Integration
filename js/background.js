@@ -1,6 +1,7 @@
 chrome.action.setBadgeBackgroundColor({color: 'purple'});
 chrome.action.setBadgeTextColor({color: 'white'});
 var job_running = false;
+var canceled = false;
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -104,6 +105,10 @@ async function open_url(tab_id, url, table_id, name = 'table', scroll_attempts =
                                     fd.append("file", blob)
                                     if (!send_url.searchParams.has('update')) {
                                         send_url.searchParams.append('update', '1')
+                                    }
+                                    if (canceled) {
+                                        reject({message: 'Send request to API canceled'})
+                                        return;
                                     }
                                     fetch(send_url,
                                         {
@@ -232,7 +237,15 @@ async function retrieve_all(tabId, from_cron = false) {
     if (plugin_json_settings) {
 
         for (let index = 0; index < plugin_json_settings.pages.length; index++) {
+            if (canceled) {
+                canceled = false;
+                break;
+            }
             await open_page_object(plugin_json_settings.pages, index, tabId, plugin_json_settings.auto_interval)
+            if (canceled) {
+                canceled = false;
+                break
+            }
         }
     }
 
@@ -245,6 +258,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         case "retrieve_all":
             (async () => {
                 if (!job_running) {
+                    if (canceled) canceled = false;
                     job_running = true;
                     await retrieve_all(tabId);
                     job_running = false;
@@ -257,11 +271,13 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         case "retrieve_page":
             console.log('job_runing', job_running)
             if (!job_running) {
+                if (canceled) canceled = false;
                 chrome.storage.local.get('plugin_json_settings', async function (data) {
                     if (data.plugin_json_settings) {
                         let index = message.index;
                         job_running = true;
                         await open_page_object(data.plugin_json_settings.pages, index, message.tabId, data.plugin_json_settings.auto_interval)
+                        if (canceled) canceled = false;
                         job_running = false;
                     }
                 })
@@ -270,12 +286,24 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             }
             break;
 
+        case "request_state":
+            sendResponse({job_running, canceled})
+            break;
+
+        case "reset_state":
+            job_running = false;
+            canceled = true;
+            chrome.storage.local.remove("retrieving_page_index")
+            sendResponse({job_running, canceled})
+            log("All jobs canceled by user", "warning")
+            break;
 
     }
     sendResponse({action: 'ok', error: ''})
 })
 
 async function run_schedule_task() {
+    if (canceled) canceled = false;
     if (!job_running) {
         job_running = true;
         log("Start sync all", "success")
