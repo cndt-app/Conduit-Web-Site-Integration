@@ -459,13 +459,13 @@ function write_to_console(message, type, time) {
     console_log.scrollTop = console_log.scrollHeight;
 }
 
-function console_add(message, type = "danger") {
+function console_add(message, type = "danger", store = true, time = null) {
     console_block.style.display = 'block';
     if (!message) return;
     console.log(message)
-    let time = new Date().toLocaleString();
+    if (!time) time = new Date().toLocaleString();
     write_to_console(message, type, time)
-    chrome.storage.local.get('log', function (data) {
+    if (store) chrome.storage.local.get('log', function (data) {
 
         if (!data.log) data.log = [];
         data.log.push({message, type, time})
@@ -497,7 +497,7 @@ chrome.runtime.onMessage.addListener(function (request) {
             fill_connection_list();
             break;
         case "log":
-            console_add(request.message, request.type ? request.type : "danger")
+            console_add(request.message, request.type ? request.type : "danger", false)
             break;
 
     }

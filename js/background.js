@@ -9,6 +9,14 @@ function sleep(ms) {
 
 function log(message, type = 'danger') {
     console.log(type, message);
+    let time = new Date().toLocaleString();
+    chrome.storage.local.get('log', function (data) {
+
+        if (!data.log) data.log = [];
+        data.log.push({message, type, time})
+        data.log = data.log.slice(data.log.length - 100, data.log.length)
+        chrome.storage.local.set({'log': data.log})
+    })
     chrome.runtime.sendMessage({action: "log", message: message, type: type})
 
 }
@@ -293,9 +301,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         case "reset_state":
             job_running = false;
             canceled = true;
+            log("All jobs are canceled by user", "warning")
             chrome.storage.local.remove("retrieving_page_index")
             sendResponse({job_running, canceled})
-            log("All jobs canceled by user", "warning")
             break;
 
     }
