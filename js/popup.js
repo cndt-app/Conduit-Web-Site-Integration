@@ -463,7 +463,7 @@ function console_add(message, type = "danger") {
     console_block.style.display = 'block';
     if (!message) return;
     console.log(message)
-    let time = new Date().toLocaleTimeString();
+    let time = new Date().toLocaleString();
     write_to_console(message, type, time)
     chrome.storage.local.get('log', function (data) {
 

@@ -128,6 +128,7 @@ async function open_url(tab_id, url, table_id, name = 'table', scroll_attempts =
                             }
 
                         }).catch(function (err) {
+                            console.log(err);
                             reject({message: JSON.stringify(err)})
                         });
 
@@ -319,4 +320,5 @@ chrome.runtime.onStartup.addListener(keepAlive);
 keepAlive();
 setTimeout(cron, 5000);
 
-//todo after reload of app can circle previous spinner
+// todo after reload of app can circle previous spinner
+// todo save log when popup is hidden
