@@ -176,25 +176,21 @@ async function open_page_object(pages, index, tabId, auto_interval = false) {
         action: "page_process_finished",
         index: index
     }
+    let log_message;
     await open_url(tabId, page.url, page.table_id, page.name, page.scroll_attempts, page.send_to_url)
         .then((response) => {
             page['last_request']['result'] = "OK";
             page['last_request']['message'] = response.message
-            message['log'] = {}
-            message['log']['message'] = `${page.name}: ${response.message}`
-            message['log']['type'] = 'success'
+            log_message = [`${page.name}: ${response.message}`, 'success']
         })
         .catch((error) => {
-            console.log('error', error)
             let error_message = '';
             if (error.error_type) error_message += `${error.error_type}`;
             if (error.status) error_message += ` ${error.status}:`
             error_message += ` ${error.message}`
 
             if (error_message) {
-                message['log'] = {}
-                message['log']['message'] = error_message;
-                message['log']['type'] = 'danger'
+                log_message = [error_message, 'danger']
             }
             page['last_request']['result'] = "FAIL";
             page['last_request']['message'] = error_message
@@ -206,6 +202,7 @@ async function open_page_object(pages, index, tabId, auto_interval = false) {
                 console.log(data.plugin_json_settings)
                 chrome.storage.local.set({plugin_json_settings: data.plugin_json_settings})
                 chrome.runtime.sendMessage(message)
+                log(...log_message)
             })
 
         })
