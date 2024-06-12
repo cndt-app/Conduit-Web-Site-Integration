@@ -2,6 +2,7 @@ chrome.action.setBadgeBackgroundColor({color: 'purple'});
 chrome.action.setBadgeTextColor({color: 'white'});
 var job_running = false;
 var canceled = false;
+var last_subjob_begin = new Date();
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -167,6 +168,7 @@ async function open_url(tab_id, url, table_id, name = 'table', scroll_attempts =
 }
 
 async function open_page_object(pages, index, tabId, auto_interval = false) {
+    last_subjob_begin = new Date();
     let page = pages[index];
     page['last_request'] = {"begin_at": new Date().toLocaleString()}
     console.log(`open ${page.url}`)
@@ -190,7 +192,7 @@ async function open_page_object(pages, index, tabId, auto_interval = false) {
             error_message += ` ${error.message}`
 
             if (error_message) {
-                log_message = [error_message, 'danger']
+                log_message = [`${page.name}: ${error_message}`, 'danger']
             }
             page['last_request']['result'] = "FAIL";
             page['last_request']['message'] = error_message
@@ -256,12 +258,26 @@ async function retrieve_all(tabId, from_cron = false) {
 
 }
 
+function reset_state(log_message = null) {
+
+    job_running = false;
+    canceled = true;
+    chrome.storage.local.remove("retrieving_page_index")
+    if (log_message) {
+        log(log_message, 'warning')
+    }
+
+}
+
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     console.log(message);
     let tabId = message.tabId
+    let curTime = new Date();
+    let last_run_minutes = new Date(curTime - last_subjob_begin).getMinutes()
     switch (message.action) {
         case "retrieve_all":
             (async () => {
+                if (job_running && last_run_minutes >= 1) reset_state("Last job is running longer than 1 minute. Stop");
                 if (!job_running) {
                     if (canceled) canceled = false;
                     job_running = true;
@@ -275,6 +291,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             break;
         case "retrieve_page":
             console.log('job_runing', job_running)
+            if (job_running && last_run_minutes >= 1) reset_state("Last job is running longer than 1 minute. Stop");
             if (!job_running) {
                 if (canceled) canceled = false;
                 chrome.storage.local.get('plugin_json_settings', async function (data) {
@@ -296,10 +313,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             break;
 
         case "reset_state":
-            job_running = false;
-            canceled = true;
-            log("All jobs are canceled by user", "warning")
-            chrome.storage.local.remove("retrieving_page_index")
+            reset_state("All jobs are canceled by user", "warning")
             sendResponse({job_running, canceled})
             break;
 
@@ -309,6 +323,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
 async function run_schedule_task() {
     if (canceled) canceled = false;
+    let curTime = new Date();
+    let last_run_minutes = new Date(curTime - last_subjob_begin).getMinutes()
+    if (job_running && last_run_minutes >= 15) reset_state("Last job is running longer than 15 minute. Stop");
     if (!job_running) {
         job_running = true;
         log("Start sync all", "success")
@@ -354,4 +371,3 @@ keepAlive();
 setTimeout(cron, 5000);
 
 // todo after reload of app can circle previous spinner
-// todo save log when popup is hidden
