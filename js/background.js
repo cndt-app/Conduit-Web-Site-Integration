@@ -91,7 +91,7 @@ async function open_url(tab_id, url, table_id, name = 'table', scroll_attempts =
                             if (!responseCT.rows) {
                                 reject({
                                     error_type: 'Error on page',
-                                    message: 'There is no required table! May be you need to authorize in 3d part service'
+                                    message: 'The table has not been found. You may need to log in to the website where the table is located.'
                                 })
                                 chrome.webNavigation.onCompleted.removeListener(onCompletted);
                                 return;
