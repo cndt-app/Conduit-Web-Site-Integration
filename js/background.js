@@ -90,9 +90,14 @@ async function open_url(tab_id, url, table_id, name = 'table', scroll_attempts =
                             console.log(responseCT);
                             if (!responseCT.rows) {
                                 reject({
-                                    error_type: 'Error on page',
+                                    type: 'warning',
                                     message: 'The table has not been found. You may need to log in to the website where the table is located.'
                                 })
+                                chrome.webNavigation.onCompleted.removeListener(onCompletted);
+                                return;
+                            }
+                            if (responseCT.rows.length <= 1) {
+                                reject({type: 'warning', message: "The table is empty. There is nothing to send."})
                                 chrome.webNavigation.onCompleted.removeListener(onCompletted);
                                 return;
                             }
@@ -192,7 +197,7 @@ async function open_page_object(pages, index, tabId, auto_interval = false) {
             error_message += ` ${error.message}`
 
             if (error_message) {
-                log_message = [`${page.name}: ${error_message}`, 'danger']
+                log_message = [`${page.name}: ${error_message}`, error.type ? error.type : 'danger']
             }
             page['last_request']['result'] = "FAIL";
             page['last_request']['message'] = error_message
